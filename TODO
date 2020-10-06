@@ -1,0 +1,10 @@
+Todo:
+  ☐ Add README
+  ☐ Caching (https://habr.com/ru/post/451146/)
+  ✔ Check data-v-* attribute @started(20-10-06 20:03) @done(20-10-06 20:13) @lasted(10m52s)
+
+Include:
+  ☐ Vue Router
+  ☐ Vuex
+  ☐ Typescript
+
