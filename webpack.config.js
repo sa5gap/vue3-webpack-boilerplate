@@ -2,7 +2,7 @@
 // based on https://github.com/starkovsky/vue3-webpack-boilerplate
 
 // * imports {{{
-const { join } = require('path')
+const { join, resolve } = require('path')
 const { DefinePlugin, HashedModuleIdsPlugin } = require('webpack')
 const { VueLoaderPlugin } = require('vue-loader')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
@@ -23,17 +23,35 @@ const paths = (context) => {
   return { res, src, dist, pub }
 }
 
-module.exports = (env, options) => {
-  const isProd = options.mode == 'production'
+module.exports.default = (
+  env,
+  { mode },
+  {
+    context,
+    entry,
+    output,
+    optimization,
+    vueAlias,
+    plugins = {},
+    rules = { images: {} },
+    devServer,
+  } = {}
+) => {
+  const isProd = mode == 'production'
+  const { res, src, dist, pub } = paths(context)
+
   return {
-    mode: isProd ? 'production' : 'development',
+    context: context || __dirname,
+
+    mode,
+
     devtool: isProd ? 'source-map' : 'inline-source-map',
 
-    entry: {
+    entry: entry || {
       app: src('main.js'),
     },
 
-    output: {
+    output: output || {
       path: dist(),
       publicPath: '',
       filename: isProd ? 'js/[name].[contenthash:8].js' : 'js/[name].js',
@@ -50,7 +68,7 @@ module.exports = (env, options) => {
         // vue$: '@vue/runtime-dom',
 
         // from: vue cli
-        vue$: 'vue/dist/vue.runtime.esm-bundler.js',
+        vue$: vueAlias || 'vue/dist/vue.runtime.esm-bundler.js',
         '@': src(),
       },
       extensions: ['.ts', '.js', '.vue', '.json'],
@@ -173,7 +191,11 @@ module.exports = (env, options) => {
                 fallback: {
                   loader: 'file-loader',
                   options: {
-                    name: 'img/[name].[hash:8].[ext]',
+                    publicPath: rules.images && rules.images.publicPath,
+                    outputPath: rules.images && rules.images.outputPath,
+                    name:
+                      (rules.images && rules.images.name) ||
+                      'img/[name].[hash:8].[ext]',
                   },
                 },
               },
@@ -236,7 +258,7 @@ module.exports = (env, options) => {
       ],
     },
 
-    optimization: {
+    optimization: optimization || {
       splitChunks: {
         cacheGroups: {
           vendors: {
@@ -296,54 +318,80 @@ module.exports = (env, options) => {
 
     plugins: [
       new VueLoaderPlugin(),
-      new DefinePlugin({
-        __VUE_OPTIONS_API__: 'true',
-        __VUE_PROD_DEVTOOLS__: 'false',
-      }),
-      new DefinePlugin({
-        'process.env': {
-          NODE_ENV: JSON.stringify(isProd ? 'production' : 'development'),
-          VUE_APP_CLI_UI_URL: JSON.stringify(''),
-          BASE_URL: JSON.stringify('/'),
-          // from: vue-router-next/playground
-          __BROWSER__: 'true',
-        },
-      }),
-      new CleanWebpackPlugin(),
-      new HtmlWebpackPlugin({
-        templateParameters: {
-          BASE_URL: '',
-        },
-        template: public('index.html'),
-        ...(isProd && {
-          minify: {
-            removeComments: true,
-            collapseWhitespace: true,
-            removeAttributeQuotes: true,
-            collapseBooleanAttributes: true,
-            removeScriptTypeAttributes: true,
+
+      // define {{{
+      ...(plugins.define || [
+        new DefinePlugin({
+          __VUE_OPTIONS_API__: 'true',
+          __VUE_PROD_DEVTOOLS__: 'false',
+        }),
+        new DefinePlugin({
+          'process.env': {
+            NODE_ENV: JSON.stringify(isProd ? 'production' : 'development'),
+            VUE_APP_CLI_UI_URL: JSON.stringify(''),
+            BASE_URL: JSON.stringify('/'),
+            // from: vue-router-next/playground
+            __BROWSER__: 'true',
           },
         }),
-      }),
-      new CopyPlugin({
-        patterns: [
-          {
-            from: public(),
-            to: dist(),
-            toType: 'dir',
-            globOptions: {
-              ignore: ['.DS_Store', 'index.html'],
-            },
+      ]),
+      // }}}
+
+      // clean {{{
+      ...(plugins.clean || [new CleanWebpackPlugin()]),
+      // }}}
+
+      // html {{{
+      ...(plugins.html || [
+        new HtmlWebpackPlugin({
+          templateParameters: {
+            BASE_URL: '',
           },
-        ],
-      }),
-      // extra plugins {{{
+          template: pub('index.html'),
+          ...(isProd && {
+            minify: {
+              removeComments: true,
+              collapseWhitespace: true,
+              removeAttributeQuotes: true,
+              collapseBooleanAttributes: true,
+              removeScriptTypeAttributes: true,
+            },
+          }),
+        }),
+      ]),
+      // }}}
+
+      // copy {{{
+      ...(plugins.copy || [
+        new CopyPlugin({
+          patterns: [
+            {
+              from: pub(),
+              to: dist(),
+              toType: 'dir',
+              globOptions: {
+                ignore: ['.DS_Store', 'index.html'],
+              },
+            },
+          ],
+        }),
+      ]),
+      // }}}
+
+      // production: css-extract {{{
       ...(isProd
-        ? [
+        ? plugins.cssExtract || [
             new MiniCssExtractPlugin({
               filename: 'css/[name].[contenthash:8].css',
               chunkFilename: 'css/[name].[contenthash:8].css',
             }),
+          ]
+        : []),
+      // }}}
+
+      // production: css-optimize {{{
+      ...(isProd
+        ? plugins.cssOptimize || [
             new OptimizeCssnanoPlugin({
               sourceMap: false,
               cssnanoOptions: {
@@ -356,6 +404,13 @@ module.exports = (env, options) => {
                 ],
               },
             }),
+          ]
+        : []),
+      // }}}
+
+      // production: extra plugins {{{
+      ...(isProd
+        ? [
             new HashedModuleIdsPlugin({
               hashDigest: 'hex',
             }),
@@ -366,9 +421,13 @@ module.exports = (env, options) => {
           ]
         : []),
       /// }}}
+
+      // extra plugins {{{
+      ...(plugins.extra || []),
+      // }}}
     ],
 
-    devServer: {
+    devServer: devServer || {
       contentBase: dist(),
       historyApiFallback: true,
       hot: true,
