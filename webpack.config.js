@@ -1,5 +1,6 @@
 // vue.js 3 webpack config
-// based on https://github.com/starkovsky/vue3-webpack-boilerplate
+// https://github.com/sa5gap/vue3-webpack-boilerplate
+// inspired by https://github.com/starkovsky/vue3-webpack-boilerplate
 
 // * imports {{{
 const { join, resolve } = require('path')
