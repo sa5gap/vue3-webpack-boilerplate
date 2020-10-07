@@ -114,6 +114,7 @@ module.exports = (env, options) => {
                     modules: {
                       localIdentName: '[name]_[local]_[hash:base64:5]',
                     },
+                    esModule: false,
                   },
                 },
                 {
@@ -147,6 +148,7 @@ module.exports = (env, options) => {
                   options: {
                     sourceMap: false,
                     importLoaders: 2,
+                    esModule: false,
                   },
                 },
                 {
