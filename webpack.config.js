@@ -15,12 +15,13 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
   .BundleAnalyzerPlugin
 // }}}
 
-// * helper functions {{{
-const resolve = (...args) => join(__dirname, ...args)
-const src = (...args) => resolve('src', ...args)
-const dist = (...args) => resolve('dist', ...args)
-const public = (...args) => resolve('public', ...args)
-// }}}
+const paths = (context) => {
+  const res = (...args) => resolve(context || __dirname, ...args)
+  const src = (...args) => res('src', ...args)
+  const dist = (...args) => res('dist', ...args)
+  const pub = (...args) => res('public', ...args)
+  return { res, src, dist, pub }
+}
 
 module.exports = (env, options) => {
   const isProd = options.mode == 'production'
@@ -375,3 +376,5 @@ module.exports = (env, options) => {
     },
   }
 }
+
+module.exports.paths = paths
