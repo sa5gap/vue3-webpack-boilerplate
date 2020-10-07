@@ -5,7 +5,10 @@
   "scripts": {
     "dev": "webpack --mode=development",
     "srv": "webpack-dev-server --mode=development",
-    "build": "webpack --mode=production"
+    "build": "webpack --mode=production",
+    "examples": "webpack-dev-server --mode=development --config=examples/webpack.config.js",
+    "examples:dev": "webpack --mode=development --config=examples/webpack.config.js",
+    "examples:build": "webpack --mode=production --config=examples/webpack.config.js"
   },
   "dependencies": {
     "vue": "^3.0.0-0"
