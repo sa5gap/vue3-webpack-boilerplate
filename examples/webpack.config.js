@@ -10,7 +10,6 @@ const path = require('path')
 const { default: webpackConfig, paths } = require('../webpack.config.js')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
-
 // }}}
 
 // * functions {{{
@@ -24,16 +23,23 @@ function walkDir(dir, entries = {}, templates = []) {
       if (fs.existsSync(entryPath)) {
         // entry detected
         entries[relPath] = map[child] = entryPath
+        let templatePath = path.join(p, 'index.html')
         templates.push(
           new HtmlWebpackPlugin({
             inject: true,
             filename: dist(relPath, 'index.html'),
             chunks: [relPath],
-            templateContent: htmlTemplate(
-              `${relPath} - Chibi UI Examples`,
-              `<a href="/">&larr; Examples index</a>`,
-              relPath
-            ),
+            ...(fs.existsSync(templatePath)
+              ? {
+                  template: templatePath,
+                }
+              : {
+                  templateContent: htmlTemplate(
+                    `${relPath} - Chibi UI Examples`,
+                    `<a href="/">&larr; Examples index</a>`,
+                    relPath
+                  ),
+                }),
           })
         )
       } else {
