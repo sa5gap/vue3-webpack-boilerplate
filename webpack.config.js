@@ -34,7 +34,7 @@ module.exports.default = (
     vueAlias,
     plugins = {},
     rules = { images: {} },
-    devServer,
+    devServer = {},
   } = {}
 ) => {
   const isProd = mode == 'production'
@@ -427,7 +427,8 @@ module.exports.default = (
       // }}}
     ],
 
-    devServer: devServer || {
+    devServer: devServer.all || {
+      port: devServer.port,
       contentBase: dist(),
       historyApiFallback: true,
       hot: true,
