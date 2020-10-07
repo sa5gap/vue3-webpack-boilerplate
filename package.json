@@ -11,6 +11,7 @@
     "examples:build": "webpack --mode=production --config=examples/webpack.config.js"
   },
   "dependencies": {
+    "core-js": "^3.6.5",
     "vue": "^3.0.0-0"
   },
   "devDependencies": {
