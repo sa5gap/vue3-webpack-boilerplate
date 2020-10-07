@@ -1,3 +1,7 @@
+// vue.js 3 webpack config
+// for multipage apps
+// https://github.com/sa5gap/vue3-webpack-boilerplate
+
 'use strict'
 
 // * imports {{{
