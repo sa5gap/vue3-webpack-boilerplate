@@ -1,3 +1,17 @@
 {
-  "presets": ["@babel/env", "@babel/typescript"]
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "useBuiltIns": "usage",
+        "corejs": 3,
+        "include": [
+          "es.array.iterator",
+          "es.promise",
+          "es.object.assign",
+          "es.promise.finally"
+        ]
+      }
+    ]
+  ]
 }
