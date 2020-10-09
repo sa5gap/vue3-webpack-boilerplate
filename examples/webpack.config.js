@@ -7,7 +7,7 @@
 // * imports {{{
 const fs = require('fs')
 const path = require('path')
-const { default: webpackConfig, paths } = require('../webpack.config.js')
+const { default: webpackConfig, paths } = require('../webpack.config.utils.js')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 // }}}
@@ -19,8 +19,11 @@ function walkDir(dir, entries = {}, templates = []) {
     const p = path.join(dir, child)
     if (fs.statSync(p).isDirectory()) {
       const relPath = path.relative(src(), p)
-      const entryPath = path.join(p, 'main.js')
-      if (fs.existsSync(entryPath)) {
+      const entryPath = Array('js', 'ts').reduce((acc, val) => {
+        let e = path.join(p, `main.${val}`)
+        return fs.existsSync(e) ? e : acc
+      }, false)
+      if (entryPath) {
         // entry detected
         entries[relPath] = map[child] = entryPath
         let templatePath = path.join(p, 'index.html')
