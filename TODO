@@ -2,10 +2,14 @@ Todo:
   ☐ Add README
   ☐ Caching (https://habr.com/ru/post/451146/)
   ✔ Check data-v-* attribute @started(20-10-06 20:03) @done(20-10-06 20:13) @lasted(10m52s)
-  
-  Src:
-    Include:
-      ☐ Vue Router
-      ☐ Vuex
-      ☐ Typescript
+  Typescript:
+    ✔ Typescript support @done(20-10-09 18:52)
+    ✔ Typescript type checker (see cli configs + https://github.com/deemaxx/vue-next-webpack-typescript) @done(20-10-09 18:56)
+    ☐ Typescript config 
+       - https://github.com/zhuqingguang/vue3-playground 
+       - https://github.com/deemaxx/vue-next-webpack-typescript
+       - https://github.com/starkovsky/vue3-webpack-boilerplate
+  ☐ Ability to disable plugins passing to config false value
+  ☐ Add Vue Router
+  ☐ Add Vuex
   
