@@ -13,6 +13,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const TerserPlugin = require('terser-webpack-plugin')
 const OptimizeCssnanoPlugin = require('@intervolga/optimize-cssnano-plugin')
 const CopyPlugin = require('copy-webpack-plugin')
+const WebpackBar = require('webpackbar')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
   .BundleAnalyzerPlugin
 // }}}
@@ -461,6 +462,8 @@ module.exports.default = (
       // extra plugins {{{
       ...(plugins.extra || []),
       // }}}
+
+      new WebpackBar(),
     ],
 
     devServer: devServer.all || {
