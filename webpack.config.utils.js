@@ -38,6 +38,7 @@ module.exports.default = (
     plugins = {},
     rules = { images: {} },
     devServer = {},
+    typescript = true,
   } = {}
 ) => {
   const isProd = mode == 'production'
@@ -106,7 +107,7 @@ module.exports.default = (
           // ],
         },
         // ts
-        {
+        typescript && {
           test: /\.ts$/,
           use: [
             {
@@ -275,7 +276,7 @@ module.exports.default = (
           test: /\.pug$/,
           loader: 'vue-indent-pug-loader',
         },
-      ],
+      ].filter((rule) => rule),
     },
 
     optimization: optimization || {
@@ -340,20 +341,21 @@ module.exports.default = (
       new VueLoaderPlugin(),
 
       // ts type checker {{{
-      new ForkTsCheckerWebpackPlugin({
-        typescript: {
-          extensions: {
-            vue: {
-              enabled: true,
-              compiler: '@vue/compiler-sfc',
+      typescript &&
+        new ForkTsCheckerWebpackPlugin({
+          typescript: {
+            extensions: {
+              vue: {
+                enabled: true,
+                compiler: '@vue/compiler-sfc',
+              },
+            },
+            diagnosticOptions: {
+              semantic: true,
+              syntactic: isProd,
             },
           },
-          diagnosticOptions: {
-            semantic: true,
-            syntactic: isProd,
-          },
-        },
-      }),
+        }),
       // }}}
 
       // define {{{
@@ -464,7 +466,7 @@ module.exports.default = (
       // }}}
 
       new WebpackBar(),
-    ],
+    ].filter((plugin) => plugin),
 
     devServer: devServer.all || {
       port: devServer.port,
