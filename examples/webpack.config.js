@@ -144,7 +144,5 @@ module.exports = (env, options) => {
     devServer: { port: 9090 },
   })
 
-  // console.log(config)
-  // process.exit()
   return config
 }
