@@ -34,9 +34,9 @@ module.exports.default = (
     entry,
     output,
     optimization,
-    vueAlias,
     plugins = {},
     rules = { images: {} },
+    alias = { vue: null, extra: {} },
     devServer = {},
     typescript = true,
   } = {}
@@ -72,8 +72,9 @@ module.exports.default = (
         // vue$: '@vue/runtime-dom',
 
         // from: vue cli
-        vue$: vueAlias || 'vue/dist/vue.runtime.esm-bundler.js',
+        vue$: alias.vue || 'vue/dist/vue.runtime.esm-bundler.js',
         '@': src(),
+        ...alias.extra,
       },
       extensions: ['.ts', '.js', '.vue', '.json'],
     },
