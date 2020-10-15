@@ -45,7 +45,7 @@ module.exports.default = (
     entry,
     output,
     optimization,
-    plugins = { cssExtract: true, analize: true },
+    plugins = {},
     rules = { images: {} },
     alias = { vue: null, extra: {} },
     devServer = {},
