@@ -9,7 +9,7 @@ Todo:
        - https://github.com/zhuqingguang/vue3-playground 
        - https://github.com/deemaxx/vue-next-webpack-typescript
        - https://github.com/starkovsky/vue3-webpack-boilerplate
-  ☐ Ability to disable plugins passing to config false value
+  ✔ Ability to disable plugins passing to config false value @done(20-10-15 18:46)
   ☐ Add Vue Router
   ☐ Add Vuex
   
