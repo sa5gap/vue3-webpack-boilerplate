@@ -26,6 +26,17 @@ const paths = (context) => {
   return { res, src, dist, pub }
 }
 
+const pluginFactory = (confValue, defaultValue) => {
+  if (confValue === false) return []
+  if (confValue === undefined || confValue === true) {
+    if (typeof defaultValue == 'function') defaultValue = defaultValue()
+    if (!Array.isArray(defaultValue)) defaultValue = [defaultValue]
+    return defaultValue
+  }
+  if (!Array.isArray(confValue)) confValue = [confValue]
+  return confValue
+}
+
 module.exports.default = (
   env,
   { mode },
@@ -34,7 +45,7 @@ module.exports.default = (
     entry,
     output,
     optimization,
-    plugins = {},
+    plugins = { cssExtract: true, analize: true },
     rules = { images: {} },
     alias = { vue: null, extra: {} },
     devServer = {},
@@ -44,7 +55,7 @@ module.exports.default = (
   const isProd = mode == 'production'
   const { res, src, dist, pub } = paths(context)
 
-  return {
+  const config = {
     context: context || __dirname,
 
     mode,
@@ -360,7 +371,7 @@ module.exports.default = (
       // }}}
 
       // define {{{
-      ...(plugins.define || [
+      ...pluginFactory(plugins.define, () => [
         new DefinePlugin({
           __VUE_OPTIONS_API__: 'true',
           __VUE_PROD_DEVTOOLS__: 'false',
@@ -378,31 +389,34 @@ module.exports.default = (
       // }}}
 
       // clean {{{
-      ...(plugins.clean || [new CleanWebpackPlugin()]),
+      ...pluginFactory(plugins.clean, () => new CleanWebpackPlugin()),
       // }}}
 
       // html {{{
-      ...(plugins.html || [
-        new HtmlWebpackPlugin({
-          templateParameters: {
-            BASE_URL: '',
-          },
-          template: pub('index.html'),
-          ...(isProd && {
-            minify: {
-              removeComments: true,
-              collapseWhitespace: true,
-              removeAttributeQuotes: true,
-              collapseBooleanAttributes: true,
-              removeScriptTypeAttributes: true,
+      ...pluginFactory(
+        plugins.html,
+        () =>
+          new HtmlWebpackPlugin({
+            templateParameters: {
+              BASE_URL: '',
             },
-          }),
-        }),
-      ]),
+            template: pub('index.html'),
+            ...(isProd && {
+              minify: {
+                removeComments: true,
+                collapseWhitespace: true,
+                removeAttributeQuotes: true,
+                collapseBooleanAttributes: true,
+                removeScriptTypeAttributes: true,
+              },
+            }),
+          })
+      ),
       // }}}
 
       // copy {{{
-      ...(plugins.copy || [
+      ...pluginFactory(
+        plugins.copy,
         new CopyPlugin({
           patterns: [
             {
@@ -414,52 +428,59 @@ module.exports.default = (
               },
             },
           ],
-        }),
-      ]),
+        })
+      ),
       // }}}
 
       // production: css-extract {{{
-      ...(isProd
-        ? plugins.cssExtract || [
-            new MiniCssExtractPlugin({
-              filename: 'css/[name].[contenthash:8].css',
-              chunkFilename: 'css/[name].[contenthash:8].css',
-            }),
-          ]
-        : []),
+      ...pluginFactory(
+        isProd && plugins.cssExtract,
+        () =>
+          new MiniCssExtractPlugin({
+            filename: 'css/[name].[contenthash:8].css',
+            chunkFilename: 'css/[name].[contenthash:8].css',
+          })
+      ),
       // }}}
 
       // production: css-optimize {{{
-      ...(isProd
-        ? plugins.cssOptimize || [
-            new OptimizeCssnanoPlugin({
-              sourceMap: false,
-              cssnanoOptions: {
-                preset: [
-                  'default',
-                  {
-                    mergeLonghand: false,
-                    cssDeclarationSorter: false,
-                  },
-                ],
-              },
-            }),
-          ]
-        : []),
+      ...pluginFactory(
+        isProd && plugins.cssOptimize,
+        () =>
+          new OptimizeCssnanoPlugin({
+            sourceMap: false,
+            cssnanoOptions: {
+              preset: [
+                'default',
+                {
+                  mergeLonghand: false,
+                  cssDeclarationSorter: false,
+                },
+              ],
+            },
+          })
+      ),
       // }}}
 
       // production: extra plugins {{{
-      ...(isProd
-        ? [
-            new HashedModuleIdsPlugin({
-              hashDigest: 'hex',
-            }),
-            new BundleAnalyzerPlugin({
-              analyzerMode: 'static',
-              openAnalyzer: false,
-            }),
-          ]
-        : []),
+      ...pluginFactory(
+        isProd,
+        () =>
+          new HashedModuleIdsPlugin({
+            hashDigest: 'hex',
+          })
+      ),
+      /// }}}
+
+      // production: analize {{{
+      ...pluginFactory(
+        isProd && plugins.analize,
+        () =>
+          new BundleAnalyzerPlugin({
+            analyzerMode: 'static',
+            openAnalyzer: false,
+          })
+      ),
       /// }}}
 
       // extra plugins {{{
@@ -477,6 +498,9 @@ module.exports.default = (
       stats: 'minimal',
     },
   }
+
+  // console.log(config)
+  return config
 }
 
 module.exports.paths = paths
